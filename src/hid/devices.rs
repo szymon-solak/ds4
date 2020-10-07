@@ -12,9 +12,6 @@ pub(crate) fn get_hidraw_devices(context: &libudev::Context) -> Result<Vec<Hidra
 
   enumerator.match_subsystem("hidraw")?;
 
-  // ds4 v1 => VID = 0x054C, PID = 0x5C4
-  // ds4 v2 => VID = 0x054C, PID = 0x09CC
-
   let modalias_regex = Regex::new(r"^.*v(.*)p(.*)$").unwrap();
 
   let mut devices: Vec<HidrawDevice> = Vec::new();
@@ -41,15 +38,46 @@ pub(crate) fn get_hidraw_devices(context: &libudev::Context) -> Result<Vec<Hidra
         let vid = caps.get(1).unwrap().as_str();
         let pid = caps.get(2).unwrap().as_str();
 
+        let vid_len = vid.len();
+        let pid_len = pid.len();
+
+        let clean_vid = &vid[vid_len - 4..vid_len];
+        let clean_pid = &pid[pid_len - 4..pid_len];
+
         devices.push(HidrawDevice {
           name: name.into(),
-          vendor_id: vid.into(),
-          product_id: pid.into(),
+          vendor_id: clean_vid.into(),
+          product_id: clean_pid.into(),
         })
       },
       None => {},
     }
   }
 
-  Ok(devices)
+  let dualshocks = devices
+    .into_iter()
+    .filter(|d| { is_dualshock_device(d) })
+    .collect();
+
+  Ok(dualshocks)
+}
+
+fn is_dualshock_device(hid_device: &HidrawDevice) -> bool {
+  let known_devices = vec![
+    // Dualshock 4 V1
+    ("054C", "05C4"),
+    // Dualshock 4 V2
+    ("054C", "09CC"),
+  ];
+
+  let dev = known_devices
+    .iter()
+    .find(|device| {
+      return device.0 == hid_device.vendor_id && device.1 == hid_device.product_id;
+    });
+
+  return match dev {
+    Some(_) => true,
+    None => false,
+  }
 }
