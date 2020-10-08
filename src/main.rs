@@ -7,10 +7,11 @@ fn main() -> Result<(), Error> {
 
   for dev in devices {
     println!(
-      "Found device: (Name = {:?}, VID = {:?}, PID = {:?})",
+      "Found device: (Name = {:?}, VID = {:?}, PID = {:?}, Type = {:?})",
       dev.name,
       dev.vendor_id,
       dev.product_id,
+      dev.connection_type,
     );
   }
 
