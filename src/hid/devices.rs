@@ -1,13 +1,21 @@
 use libudev::{self, Error};
 use regex::Regex;
 
-pub(crate) struct HidrawDevice {
+#[derive(Debug)]
+pub enum ConnectionType {
+  Usb,
+  Bluetooth,
+  Unknown,
+}
+
+pub struct HidrawDevice {
   pub name: String,
   pub vendor_id: String,
   pub product_id: String,
+  pub connection_type: ConnectionType,
 }
 
-pub(crate) fn get_hidraw_devices(context: &libudev::Context) -> Result<Vec<HidrawDevice>, Error> {
+pub fn get_hidraw_devices(context: &libudev::Context) -> Result<Vec<HidrawDevice>, Error> {
   let mut enumerator = libudev::Enumerator::new(&context)?;
 
   enumerator.match_subsystem("hidraw")?;
@@ -31,6 +39,12 @@ pub(crate) fn get_hidraw_devices(context: &libudev::Context) -> Result<Vec<Hidra
           .to_str()
           .unwrap();
 
+        let devpath = dev
+          .property_value("DEVPATH")
+          .unwrap()
+          .to_str()
+          .unwrap();
+
         let caps = modalias_regex
           .captures(modalias)
           .unwrap();
@@ -48,6 +62,7 @@ pub(crate) fn get_hidraw_devices(context: &libudev::Context) -> Result<Vec<Hidra
           name: name.into(),
           vendor_id: clean_vid.into(),
           product_id: clean_pid.into(),
+          connection_type: get_connection_type_from_path(&devpath),
         })
       },
       None => {},
@@ -80,4 +95,16 @@ fn is_dualshock_device(hid_device: &HidrawDevice) -> bool {
     Some(_) => true,
     None => false,
   }
+}
+
+fn get_connection_type_from_path(path: &str) -> ConnectionType {
+  if path.contains("bluetooth") {
+    return ConnectionType::Bluetooth;
+  }
+
+  if path.contains("usb") {
+    return ConnectionType::Usb;
+  }
+
+  return ConnectionType::Unknown;
 }
