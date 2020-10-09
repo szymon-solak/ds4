@@ -1,9 +1,14 @@
+mod devices;
+mod dualshock;
+mod hidraw_device;
+
 use hidapi::HidError;
 
-mod devices;
-
-pub(crate) fn get_controllers() -> Result<Vec<devices::HidrawDevice>, HidError> {
-    let devices = devices::get_hidraw_devices()?;
+pub fn get_controllers() -> Result<Vec<hidraw_device::HidrawDevice>, HidError> {
+    let devices = devices::get_hidraw_devices()?
+        .into_iter()
+        .filter(|device| dualshock::is_dualshock_device(device))
+        .collect::<_>();
 
     Ok(devices)
 }
