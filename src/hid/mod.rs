@@ -8,5 +8,5 @@ pub(crate) fn get_controllers() -> Result<Vec<devices::HidrawDevice>, Error> {
   
   let devices = devices::get_hidraw_devices(&context)?;
 
-  return Ok(devices);
+  Ok(devices)
 }

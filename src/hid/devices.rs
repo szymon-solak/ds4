@@ -25,47 +25,44 @@ pub fn get_hidraw_devices(context: &libudev::Context) -> Result<Vec<HidrawDevice
   let mut devices: Vec<HidrawDevice> = Vec::new();
 
   for device in enumerator.scan_devices()? {
-    match device.parent() {
-      Some(dev) => {
-        let modalias = dev
-          .property_value("MODALIAS")
-          .unwrap()
-          .to_str()
-          .unwrap();
+    if let Some(dev) = device.parent() {
+      let modalias = dev
+        .property_value("MODALIAS")
+        .unwrap()
+        .to_str()
+        .unwrap();
 
-        let name = dev
-          .property_value("HID_NAME")
-          .unwrap()
-          .to_str()
-          .unwrap();
+      let name = dev
+        .property_value("HID_NAME")
+        .unwrap()
+        .to_str()
+        .unwrap();
 
-        let devpath = dev
-          .property_value("DEVPATH")
-          .unwrap()
-          .to_str()
-          .unwrap();
+      let devpath = dev
+        .property_value("DEVPATH")
+        .unwrap()
+        .to_str()
+        .unwrap();
 
-        let caps = modalias_regex
-          .captures(modalias)
-          .unwrap();
+      let caps = modalias_regex
+        .captures(modalias)
+        .unwrap();
 
-        let vid = caps.get(1).unwrap().as_str();
-        let pid = caps.get(2).unwrap().as_str();
+      let vid = caps.get(1).unwrap().as_str();
+      let pid = caps.get(2).unwrap().as_str();
 
-        let vid_len = vid.len();
-        let pid_len = pid.len();
+      let vid_len = vid.len();
+      let pid_len = pid.len();
 
-        let clean_vid = &vid[vid_len - 4..vid_len];
-        let clean_pid = &pid[pid_len - 4..pid_len];
+      let clean_vid = &vid[vid_len - 4..vid_len];
+      let clean_pid = &pid[pid_len - 4..pid_len];
 
-        devices.push(HidrawDevice {
-          name: name.into(),
-          vendor_id: clean_vid.into(),
-          product_id: clean_pid.into(),
-          connection_type: get_connection_type_from_path(&devpath),
-        })
-      },
-      None => {},
+      devices.push(HidrawDevice {
+        name: name.into(),
+        vendor_id: clean_vid.into(),
+        product_id: clean_pid.into(),
+        connection_type: get_connection_type_from_path(&devpath),
+      })
     }
   }
 
@@ -88,13 +85,10 @@ fn is_dualshock_device(hid_device: &HidrawDevice) -> bool {
   let dev = known_devices
     .iter()
     .find(|device| {
-      return device.0 == hid_device.vendor_id && device.1 == hid_device.product_id;
+      device.0 == hid_device.vendor_id && device.1 == hid_device.product_id
     });
 
-  return match dev {
-    Some(_) => true,
-    None => false,
-  }
+  dev.is_some()
 }
 
 fn get_connection_type_from_path(path: &str) -> ConnectionType {
@@ -106,5 +100,5 @@ fn get_connection_type_from_path(path: &str) -> ConnectionType {
     return ConnectionType::Usb;
   }
 
-  return ConnectionType::Unknown;
+  ConnectionType::Unknown
 }

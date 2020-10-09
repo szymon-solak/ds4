@@ -15,5 +15,5 @@ fn main() -> Result<(), Error> {
     );
   }
 
-  return Ok(());
+  Ok(())
 }
