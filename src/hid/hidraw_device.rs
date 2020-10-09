@@ -4,11 +4,7 @@ pub struct HidrawDevice {
 }
 
 impl std::fmt::Debug for HidrawDevice {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(
-            f,
-            "(VendorId = {:04x}, ProductId = {:04x})",
-            self.vendor_id, self.product_id
-        )
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "(VendorId = {:04x}, ProductId = {:04x})", self.vendor_id, self.product_id)
     }
 }

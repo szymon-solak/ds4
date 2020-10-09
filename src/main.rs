@@ -7,6 +7,9 @@ fn main() -> Result<(), HidError> {
 
     for dev in devices {
         println!("Found device: {:?}", dev);
+
+        let ds4 = hid::dualshock::Dualshock::new(dev)?;
+        println!("{:?}", ds4);
     }
 
     Ok(())

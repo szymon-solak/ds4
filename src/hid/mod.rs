@@ -1,5 +1,5 @@
 mod devices;
-mod dualshock;
+pub mod dualshock;
 mod hidraw_device;
 
 use hidapi::HidError;
