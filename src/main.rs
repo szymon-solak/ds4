@@ -1,15 +1,12 @@
-use libudev::Error;
+use hidapi::HidError;
 
 mod hid;
 
-fn main() -> Result<(), Error> {
+fn main() -> Result<(), HidError> {
     let devices = hid::get_controllers()?;
 
     for dev in devices {
-        println!(
-            "Found device: (Name = {:?}, VID = {:?}, PID = {:?}, Type = {:?})",
-            dev.name, dev.vendor_id, dev.product_id, dev.connection_type,
-        );
+        println!("Found device: {:?}", dev);
     }
 
     Ok(())

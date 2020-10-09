@@ -1,11 +1,9 @@
-use libudev::{self, Error};
+use hidapi::HidError;
 
 mod devices;
 
-pub(crate) fn get_controllers() -> Result<Vec<devices::HidrawDevice>, Error> {
-    let context = libudev::Context::new().expect("Failed to create libudev context");
-
-    let devices = devices::get_hidraw_devices(&context)?;
+pub(crate) fn get_controllers() -> Result<Vec<devices::HidrawDevice>, HidError> {
+    let devices = devices::get_hidraw_devices()?;
 
     Ok(devices)
 }
