@@ -1,5 +1,5 @@
-use hidapi::{HidApi, HidDevice, HidError};
 use crate::hid::hidraw_device::HidrawDevice;
+use hidapi::{HidApi, HidDevice, HidError};
 
 pub fn is_dualshock_device(hid_device: &HidrawDevice) -> bool {
     let known_devices = vec![
@@ -28,12 +28,15 @@ impl std::fmt::Debug for Dualshock {
 }
 
 impl Dualshock {
-    pub fn new(hid_device: HidrawDevice) -> Result<Self, HidError> {
+    pub fn new(hid_device: &HidrawDevice) -> Result<Self, HidError> {
         let api = HidApi::new()?;
         let handle = api.open(hid_device.vendor_id, hid_device.product_id)?;
 
         Ok(Self {
-            name: handle.get_product_string().unwrap_or_default().unwrap_or("DS4".into()),
+            name: handle
+                .get_product_string()
+                .unwrap_or_default()
+                .unwrap_or("DS4".into()),
             handle,
         })
     }
