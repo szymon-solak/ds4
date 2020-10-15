@@ -1,11 +1,14 @@
-use libudev::{self, Error};
-
 mod devices;
+pub mod dualshock;
+mod hidraw_device;
 
-pub(crate) fn get_controllers() -> Result<Vec<devices::HidrawDevice>, Error> {
-    let context = libudev::Context::new().expect("Failed to create libudev context");
+use hidapi::HidError;
 
-    let devices = devices::get_hidraw_devices(&context)?;
+pub fn get_controllers() -> Result<Vec<hidraw_device::HidrawDevice>, HidError> {
+    let devices = devices::get_hidraw_devices()?
+        .into_iter()
+        .filter(|device| dualshock::is_dualshock_device(device))
+        .collect::<_>();
 
     Ok(devices)
 }
