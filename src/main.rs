@@ -1,9 +1,8 @@
 use hidapi::HidError;
+use report::Report;
 
 mod hid;
 mod report;
-
-use report::{Report};
 
 fn main() -> Result<(), HidError> {
     let devices = hid::get_controllers()?;

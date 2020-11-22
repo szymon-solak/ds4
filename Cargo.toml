@@ -8,5 +8,6 @@ edition = "2018"
 
 [dependencies]
 derive-try-from-primitive = "1.0.0"
-hidapi = "1.2.3"
+hidapi = { version = "1.2.3", default-features = false, features = ["linux-static-hidraw"] }
 nom = "5.1.2"
+ux = "0.1.3"
