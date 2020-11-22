@@ -1,6 +1,8 @@
 use hidapi::HidError;
+use report::Report;
 
 mod hid;
+mod report;
 
 fn main() -> Result<(), HidError> {
     let devices = hid::get_controllers()?;
@@ -11,9 +13,11 @@ fn main() -> Result<(), HidError> {
 
     let ds4 = devices
         .first()
-        .map(|dev| hid::dualshock::Dualshock::new(dev));
+        .map(|dev| hid::dualshock::Dualshock::new(dev))
+        .expect("No devices found")?;
 
-    println!("{:?}", ds4);
-
-    Ok(())
+    loop {
+        let report = ds4.read_report()?;
+        Report::parse(&report);
+    }
 }

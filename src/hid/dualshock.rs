@@ -40,4 +40,11 @@ impl Dualshock {
             handle,
         })
     }
+
+    pub fn read_report(&self) -> Result<[u8; 64], HidError> {
+        let mut buf = [0u8; 64];
+        self.handle.read(&mut buf[..])?;
+
+        return Ok(buf);
+    }
 }
